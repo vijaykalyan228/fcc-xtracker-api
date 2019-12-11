@@ -1,7 +1,10 @@
 const express = require('express');
 const app = express();
-const bodyParser = require('body-parser');
 
+const cors = require('cors');
+app.use(cors());
+
+// Connect to Database
 const mongoose = require('mongoose');
 const mongoUrl = "mongodb+srv://admin:admin@fccnodecluster-uv7h5.mongodb.net/test?retryWrites=true&w=majority";
 mongoose.connect(mongoUrl, {
@@ -10,15 +13,12 @@ mongoose.connect(mongoUrl, {
     useFindAndModify: false
 });
 
-
-const exerciseApp = require('./controllers/app');
-
-const cors = require('cors');
-app.use(cors());
-
+// Parse Body as Json
+const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+const exerciseApp = require('./controllers/app');
 
 app.use(express.static('public'));
 app.get('/', (req, res) => {
@@ -26,6 +26,9 @@ app.get('/', (req, res) => {
 });
 
 app.post('/api/exercise/new-user', exerciseApp.newUser);
+app.get('/api/exercise/users', exerciseApp.getAllUsers);
+app.post('/api/exercise/add', exerciseApp.addExercise);
+app.get('/api/exercise/log?:userId', exerciseApp.getAllLogs);
 
 // Not found middleware
 app.use((req, res, next) => {
