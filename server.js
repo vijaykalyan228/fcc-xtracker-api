@@ -1,31 +1,36 @@
-const express = require('express')
-const app = express()
-const bodyParser = require('body-parser')
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
 
-const cors = require('cors')
-
-const mongoose = require('mongoose')
-mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track')
-
-app.use(cors())
-
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+const mongoose = require('mongoose');
+const mongoUrl = "mongodb+srv://admin:admin@fccnodecluster-uv7h5.mongodb.net/test?retryWrites=true&w=majority";
+mongoose.connect(mongoUrl, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
+});
 
 
-app.use(express.static('public'))
+const exerciseApp = require('./controllers/app');
+
+const cors = require('cors');
+app.use(cors());
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+
+app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/index.html')
 });
 
-app.post('/api/exercise/add', (req, res) => {
-    res.send("Hello Siri!");
-});
+app.post('/api/exercise/new-user', exerciseApp.newUser);
 
 // Not found middleware
 app.use((req, res, next) => {
     return next({ status: 404, message: 'not found' })
-})
+});
 
 // Error Handling middleware
 app.use((err, req, res, next) => {
@@ -44,8 +49,8 @@ app.use((err, req, res, next) => {
     }
     res.status(errCode).type('txt')
         .send(errMessage)
-})
+});
 
 const listener = app.listen(process.env.PORT || 3000, () => {
     console.log('Your app is listening on port ' + listener.address().port)
-})
+});
